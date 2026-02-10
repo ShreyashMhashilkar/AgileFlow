@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dev"
@@ -68,3 +68,16 @@ MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+if os.environ.get("DJANGO_SUPERUSER_USERNAME"):
+    try:
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username=os.environ["DJANGO_SUPERUSER_USERNAME"]).exists():
+            User.objects.create_superuser(
+                username=os.environ["DJANGO_SUPERUSER_USERNAME"],
+                email=os.environ["DJANGO_SUPERUSER_EMAIL"],
+                password=os.environ["DJANGO_SUPERUSER_PASSWORD"],
+            )
+    except Exception as e:
+        print("Superuser creation skipped:", e)
